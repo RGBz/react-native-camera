@@ -3,3 +3,7 @@
 node_modules
 ios/RCTCamera.xcodeproj/xcuserdata
 ios/RCTCamera.xcodeproj/project.xcworkspace
+.idea
+android/build
+android/gradle
+android/.gradle

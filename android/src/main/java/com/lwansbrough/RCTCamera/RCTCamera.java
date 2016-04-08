@@ -5,6 +5,8 @@
 package com.lwansbrough.RCTCamera;
 
 import android.hardware.Camera;
+import android.view.Surface;
+import android.view.WindowManager;
 
 import java.util.HashMap;
 import java.util.List;
@@ -17,7 +19,7 @@ public class RCTCamera {
     private final HashMap<Integer, Integer> _cameraTypeToIndex;
     private final Map<Number, Camera> _cameras;
     private int _orientation = -1;
-    private int _actualDeviceOrientation = 0;
+    private int _actualDeviceRotation = 0;
 
     public static RCTCamera getInstance() {
         return ourInstance;
@@ -141,8 +143,8 @@ public class RCTCamera {
         adjustPreviewLayout(RCTCameraModule.RCT_CAMERA_TYPE_BACK);
     }
 
-    public void setActualDeviceOrientation(int actualDeviceOrientation) {
-        _actualDeviceOrientation = actualDeviceOrientation;
+    public void setActualDeviceRotation(int actualDeviceRotation) {
+        _actualDeviceRotation = actualDeviceRotation;
         adjustPreviewLayout(RCTCameraModule.RCT_CAMERA_TYPE_FRONT);
         adjustPreviewLayout(RCTCameraModule.RCT_CAMERA_TYPE_BACK);
     }
@@ -229,25 +231,22 @@ public class RCTCamera {
         if (null == camera) {
             return;
         }
-
+        int actualDeviceRotationDegrees = _actualDeviceRotation * 90;
         CameraInfoWrapper cameraInfo = _cameraInfos.get(type);
-        int displayRotation;
         int rotation;
         int orientation = cameraInfo.info.orientation;
         if (cameraInfo.info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
-            rotation = (orientation + _actualDeviceOrientation * 90) % 360;
-            displayRotation = (720 - orientation - _actualDeviceOrientation * 90) % 360;
-        } else {
-            rotation = (orientation - _actualDeviceOrientation * 90 + 360) % 360;
-            displayRotation = rotation;
+            rotation = (orientation + actualDeviceRotationDegrees) % 360;
+            rotation = (360 - rotation) % 360; // compensate the mirror
+        }
+        else {
+            rotation = (orientation - _actualDeviceRotation + 360) % 360;
         }
         cameraInfo.rotation = rotation;
         // TODO: take in account the _orientation prop
-
-        camera.setDisplayOrientation(displayRotation);
+        camera.setDisplayOrientation(rotation);
 
         Camera.Parameters parameters = camera.getParameters();
-        parameters.setRotation(cameraInfo.rotation);
 
         // set preview size
         // defaults to highest resolution available
@@ -269,6 +268,21 @@ public class RCTCamera {
             cameraInfo.previewWidth = height;
             cameraInfo.previewHeight = width;
         }
+    }
+
+    public int getRotation(int type) {
+        CameraInfoWrapper cameraInfo = _cameraInfos.get(type);
+        int actualDeviceRotationDegrees = _actualDeviceRotation * 90;
+
+        int rotation;
+        if (cameraInfo.info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+            rotation = (cameraInfo.info.orientation + actualDeviceRotationDegrees) % 360;
+            rotation = (360 + rotation) % 360;  // compensate the mirror
+        }
+        else {  // back-facing
+            rotation = (cameraInfo.info.orientation - actualDeviceRotationDegrees + 360) % 360;
+        }
+        return rotation;
     }
 
     private RCTCamera() {

@@ -15,7 +15,7 @@ public class RCTCameraView extends ViewGroup {
     private final OrientationEventListener _orientationListener;
     private final Context _context;
     private RCTCameraViewFinder _viewFinder = null;
-    private int _actualDeviceOrientation = -1;
+    private int _actualDeviceRotation = -1;
     private int _aspect = RCTCameraModule.RCT_CAMERA_ASPECT_FIT;
     private String _captureQuality = "high";
     private int _torchMode = -1;
@@ -24,12 +24,12 @@ public class RCTCameraView extends ViewGroup {
     public RCTCameraView(Context context) {
         super(context);
         this._context = context;
-        setActualDeviceOrientation(context);
+        setActualDeviceRotation(context);
 
         _orientationListener = new OrientationEventListener(context, SensorManager.SENSOR_DELAY_NORMAL) {
             @Override
             public void onOrientationChanged(int orientation) {
-                if (setActualDeviceOrientation(_context)) {
+                if (setActualDeviceRotation(_context)) {
                     layoutViewFinder();
                 }
             }
@@ -95,11 +95,11 @@ public class RCTCameraView extends ViewGroup {
         }
     }
 
-    private boolean setActualDeviceOrientation(Context context) {
-        int actualDeviceOrientation = ((WindowManager) context.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getOrientation();
-        if (_actualDeviceOrientation != actualDeviceOrientation) {
-            _actualDeviceOrientation = actualDeviceOrientation;
-            RCTCamera.getInstance().setActualDeviceOrientation(_actualDeviceOrientation);
+    private boolean setActualDeviceRotation(Context context) {
+        int actualDeviceRotation = ((WindowManager) context.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getRotation();
+        if (_actualDeviceRotation != actualDeviceRotation) {
+            _actualDeviceRotation = actualDeviceRotation;
+            RCTCamera.getInstance().setActualDeviceRotation(_actualDeviceRotation);
             return true;
         } else {
             return false;

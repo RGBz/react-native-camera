@@ -161,15 +161,15 @@ RCT_EXPORT_METHOD(checkDeviceAuthorizationStatus:(RCTPromiseResolveBlock)resolve
   __block NSString *mediaType = AVMediaTypeVideo;
 
   [AVCaptureDevice requestAccessForMediaType:mediaType completionHandler:^(BOOL granted) {
-    if (!granted) {
+    // if (!granted) {
       resolve(@(granted));
-    }
-    else {
-      mediaType = AVMediaTypeAudio;
-      [AVCaptureDevice requestAccessForMediaType:mediaType completionHandler:^(BOOL granted) {
-        resolve(@(granted));
-      }];
-    }
+    // }
+    // else {
+    //   mediaType = AVMediaTypeAudio;
+    //   [AVCaptureDevice requestAccessForMediaType:mediaType completionHandler:^(BOOL granted) {
+    //     resolve(@(granted));
+    //   }];
+    // }
   }];
 }
 
@@ -536,18 +536,18 @@ RCT_EXPORT_METHOD(hasFlash:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRej
   else if (target == RCTCameraCaptureTargetDisk) {
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
     NSString *documentsDirectory = [paths firstObject];
-      
+
     NSFileManager *fileManager = [NSFileManager defaultManager];
     NSString *fullPath = [[documentsDirectory stringByAppendingPathComponent:[[NSUUID UUID] UUIDString]] stringByAppendingPathExtension:@"jpg"];
-    
+
     [fileManager createFileAtPath:fullPath contents:imageData attributes:nil];
     responseString = fullPath;
   }
-    
+
   else if (target == RCTCameraCaptureTargetTemp) {
     NSString *fileName = [[NSProcessInfo processInfo] globallyUniqueString];
     NSString *fullPath = [NSString stringWithFormat:@"%@%@.jpg", NSTemporaryDirectory(), fileName];
-      
+
     [imageData writeToFile:fullPath atomically:YES];
     responseString = fullPath;
   }
@@ -687,10 +687,10 @@ didFinishRecordingToOutputFileAtURL:(NSURL *)outputFileURL
   else if (self.videoTarget == RCTCameraCaptureTargetTemp) {
     NSString *fileName = [[NSProcessInfo processInfo] globallyUniqueString];
     NSString *fullPath = [NSString stringWithFormat:@"%@%@.mov", NSTemporaryDirectory(), fileName];
-    
+
     NSFileManager * fileManager = [NSFileManager defaultManager];
     NSError * error = nil;
-      
+
     //copying destination
     if (!([fileManager copyItemAtPath:[outputFileURL path] toPath:fullPath error:&error])) {
         self.videoReject(RCTErrorUnspecified, nil, RCTErrorWithMessage(error.description));
@@ -708,7 +708,7 @@ didFinishRecordingToOutputFileAtURL:(NSURL *)outputFileURL
   for (AVMetadataMachineReadableCodeObject *metadata in metadataObjects) {
     for (id barcodeType in [self getBarCodeTypes]) {
       if (metadata.type == barcodeType) {
-        
+
         NSDictionary *event = @{
           @"type": metadata.type,
           @"data": metadata.stringValue,
@@ -842,7 +842,7 @@ didFinishRecordingToOutputFileAtURL:(NSURL *)outputFileURL
           @"zoomFactor": [NSNumber numberWithDouble:zoomFactor],
           @"velocity": [NSNumber numberWithDouble:velocity]
         };
-      
+
         [self.bridge.eventDispatcher sendInputEventWithName:@"zoomChanged" body:event];
 
         device.videoZoomFactor = zoomFactor;
